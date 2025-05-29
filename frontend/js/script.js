@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     // API base URL
-    const API_BASE_URL = 'http://localhost:8000/api'; // Adjust if your backend runs elsewhere
+    const API_BASE_URL = 'http://localhost:8000/api';
 
     // DOM Elements
     const fromDateEl = document.getElementById('fromDate');
@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const noLogsFoundMessageEl = document.getElementById('noLogsFoundMessage');
     const fetchErrorMessageEl = document.getElementById('fetchErrorMessage');
     const dashboardContentEl = document.getElementById('dashboardContent');
-    const sidebarErrorEl = document.getElementById('sidebarError');
 
     // Statistics Elements
     const totalCallsEl = document.getElementById('totalCalls');
@@ -68,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let allLogs = [];
     let filteredLogs = [];
-    let chartInstances = {}; // To store Chart.js instances
+    let chartInstances = {};
 
     const languageNameMap = {
         'en-IN': 'English (India)', 'hi-IN': 'Hindi', 'bn-IN': 'Bengali',
@@ -84,6 +83,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function initialize() {
         setDefaultDates();
         updateCurrentTime();
+        updateLoadingSpinner();
         setInterval(updateCurrentTime, 1000 * 30);
         fetchLogsBtn.addEventListener('click', fetchAndDisplayLogs);
         applyFiltersBtn.addEventListener('click', applyTableFilters);
@@ -145,58 +145,103 @@ document.addEventListener('DOMContentLoaded', function () {
     async function fetchAndDisplayLogs() {
         const fromDate = fromDateEl.value;
         const toDate = toDateEl.value;
-        sidebarErrorEl.textContent = '';
 
         if (!fromDate || !toDate) {
-            sidebarErrorEl.textContent = 'Please select both dates.';
+            showError('Please select both dates.');
             return;
         }
         if (new Date(fromDate) > new Date(toDate)) {
-            sidebarErrorEl.textContent = 'From Date cannot be after To Date.';
+            showError('From Date cannot be after To Date.');
             return;
         }
 
-        loadingSpinnerEl.style.display = 'block';
-        initialMessageEl.style.display = 'none';
-        noLogsFoundMessageEl.style.display = 'none';
-        fetchErrorMessageEl.style.display = 'none';
-        dashboardContentEl.style.display = 'none';
+        // Show loading state
+        showLoading();
 
         try {
-            // --- MOCK DATA FOR TESTING ---
-            // const mockLogs = generateMockLogs(50, fromDate, toDate);
-            // allLogs = mockLogs;
-            // --- END MOCK DATA ---
-            
-            // --- ACTUAL API CALL ---
             const response = await fetch(`${API_BASE_URL}/call-logs?from_date_str=${fromDate}&to_date_str=${toDate}`);
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ detail: "Unknown server error" }));
                 throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.detail}`);
             }
             allLogs = await response.json();
-            // --- END ACTUAL API CALL ---
-
 
             if (allLogs && allLogs.length > 0) {
+                // Process and display logs
                 processAndDisplayLogs(allLogs);
-                dashboardContentEl.style.display = 'block';
+                // Hide initial message and show dashboard
+                hideInitialState();
+                showDashboard();
             } else {
-                noLogsFoundMessageEl.style.display = 'block';
-                dashboardContentEl.style.display = 'none';
-                clearAllCharts(); // Clear charts if no data
+                showNoLogs();
             }
         } catch (error) {
             console.error('Error fetching logs:', error);
-            fetchErrorMessageEl.textContent = `Error fetching logs: ${error.message}. Ensure the backend is running.`;
-            fetchErrorMessageEl.style.display = 'block';
-            dashboardContentEl.style.display = 'none';
-            clearAllCharts(); // Clear charts on error
+            showError(`Error fetching logs: ${error.message}. Ensure the backend is running.`);
         } finally {
-            loadingSpinnerEl.style.display = 'none';
+            hideLoading();
         }
     }
-    
+
+    function showLoading() {
+        // Hide all other states
+        initialMessageEl.style.display = 'none';
+        noLogsFoundMessageEl.style.display = 'none';
+        fetchErrorMessageEl.style.display = 'none';
+        dashboardContentEl.style.display = 'none';
+        
+        // Show loading spinner
+        loadingSpinnerEl.style.display = 'flex';
+        loadingSpinnerEl.style.flexDirection = 'column';
+        loadingSpinnerEl.style.alignItems = 'center';
+        loadingSpinnerEl.style.justifyContent = 'center';
+    }
+
+    function hideLoading() {
+        loadingSpinnerEl.style.display = 'none';
+    }
+
+    function showError(message) {
+        fetchErrorMessageEl.textContent = message;
+        fetchErrorMessageEl.style.display = 'block';
+        dashboardContentEl.style.display = 'none';
+        initialMessageEl.style.display = 'none';
+    }
+
+    function hideError() {
+        fetchErrorMessageEl.style.display = 'none';
+    }
+
+    function showNoLogs() {
+        noLogsFoundMessageEl.style.display = 'block';
+        dashboardContentEl.style.display = 'none';
+        initialMessageEl.style.display = 'none';
+        clearAllCharts();
+    }
+
+    function hideInitialState() {
+        initialMessageEl.style.display = 'none';
+    }
+
+    function showDashboard() {
+        dashboardContentEl.style.display = 'block';
+        initialMessageEl.style.display = 'none';
+        noLogsFoundMessageEl.style.display = 'none';
+        fetchErrorMessageEl.style.display = 'none';
+    }
+
+    // Update the loading spinner HTML structure
+    function updateLoadingSpinner() {
+        loadingSpinnerEl.innerHTML = `
+            <div class="spinner-container">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-primary">Fetching analytics data...</p>
+            </div>
+        `;
+    }
+
     function processAndDisplayLogs(logs) {
         console.log("%c=== Processing Logs ===", "background: #4CAF50; color: white; padding: 2px 5px;");
         console.log("Number of logs to process:", logs.length);

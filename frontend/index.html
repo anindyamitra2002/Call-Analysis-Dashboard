@@ -16,34 +16,7 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar collapse vh-100">
-                <div class="position-sticky pt-3">
-                    <div class="sidebar-header text-center mb-4">
-                        <i class="fas fa-headset fa-2x me-2 text-primary"></i>
-                        <h3 class="fs-5 mb-0 d-inline-block align-middle">Call Analytics</h3>
-                    </div>
-                    <h6 class="sidebar-heading px-3 mt-4 mb-2 text-muted text-uppercase">Date Range</h6>
-                    <ul class="nav flex-column">
-                        <li class="nav-item px-3">
-                            <label for="fromDate" class="form-label">From Date:</label>
-                            <input type="date" id="fromDate" class="form-control form-control-sm">
-                        </li>
-                        <li class="nav-item px-3 mt-2">
-                            <label for="toDate" class="form-label">To Date:</label>
-                            <input type="date" id="toDate" class="form-control form-control-sm">
-                        </li>
-                        <li class="nav-item px-3 mt-3">
-                            <button id="fetchLogsBtn" class="btn btn-primary w-100 btn-sm">
-                                <i class="fas fa-search me-1"></i> Fetch Logs
-                            </button>
-                        </li>
-                    </ul>
-                    <hr>
-                    <div id="sidebarError" class="px-3 text-danger small"></div>
-                </div>
-            </nav>
-
-            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <main class="col-12 px-md-4">
                 <header class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2 page-title">Dashboard Overview</h1>
                     <div id="currentTime" class="fs-6 text-muted"></div>
@@ -55,12 +28,38 @@
                     </div>
                     <p class="mt-2">Fetching logs, please wait...</p>
                 </div>
-                <div id="initialMessage" class="alert alert-info shadow-sm">
-                    <i class="fas fa-info-circle me-2"></i>Please select a date range and click "Fetch Logs" to view analytics.
+
+                <div id="initialMessage" class="initial-state-container">
+                    <div class="welcome-message">
+                        <i class="fas fa-headset fa-4x mb-4 text-primary"></i>
+                        <h2 class="mb-4">Welcome to Call Analytics Dashboard</h2>
+                        <p class="lead mb-4">Select a date range to view detailed call analytics and insights</p>
+                        <div class="date-range-container">
+                            <div class="row justify-content-center">
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label for="fromDate" class="form-label">From Date</label>
+                                        <input type="date" id="fromDate" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label for="toDate" class="form-label">To Date</label>
+                                        <input type="date" id="toDate" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="fetchLogsBtn" class="btn btn-primary btn-lg mt-3">
+                                <i class="fas fa-search me-2"></i> Fetch Analytics
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
                 <div id="noLogsFoundMessage" class="alert alert-warning shadow-sm" style="display: none;">
                     <i class="fas fa-exclamation-triangle me-2"></i>No call logs found for the selected date range.
                 </div>
+
                 <div id="fetchErrorMessage" class="alert alert-danger shadow-sm" style="display: none;">
                     <i class="fas fa-times-circle me-2"></i>Error fetching logs. Please try again.
                 </div>
@@ -263,7 +262,8 @@
                             </div>
                         </div>
                     </section>
-                </div> </main>
+                </div>
+            </main>
         </div>
     </div>
 

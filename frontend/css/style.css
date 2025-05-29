@@ -1,9 +1,24 @@
 /* General Styles */
+:root {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --secondary-color: #64748b;
+    --success-color: #22c55e;
+    --info-color: #3b82f6;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --light-bg: #f8fafc;
+    --dark-bg: #1e293b;
+    --border-color: #e2e8f0;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+}
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    background-color: #f0f2f5; /* Lighter, more modern background */
-    color: #333;
-    font-size: 0.9rem; /* Slightly reduced base font for a denser UI */
+    background-color: var(--light-bg);
+    color: var(--text-primary);
+    font-size: 0.9rem;
 }
 
 /* Sidebar */
@@ -62,8 +77,9 @@ main {
 
 /* Cards */
 .card {
-    border: 1px solid #e0e0e0; /* Subtle border for cards */
+    border: 1px solid var(--border-color);
     border-radius: 0.375rem; /* Bootstrap's default rounded corners */
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 
 .summary-card {
@@ -71,7 +87,7 @@ main {
 }
 .summary-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.1) !important;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
 }
 
 .summary-card .card-body {
@@ -101,7 +117,7 @@ main {
     font-size: 0.875rem;
 }
 #analysisTabs .nav-link.active {
-    color: #007bff;
+    color: var(--primary-color);
     background-color: #f8f9fa; /* Lighter active tab */
     border-color: #dee2e6 #dee2e6 #f8f9fa;
 }
@@ -111,10 +127,11 @@ main {
     position: relative;
     height: 300px; /* Fixed height for chart containers */
     width: 100%;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--border-color);
     border-radius: 0.375rem;
     padding: 10px;
-    background-color: #fff; /* White background for charts */
+    background-color: white;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
 }
 .chart-canvas {
     display: block;
@@ -133,7 +150,7 @@ main {
 
 /* Call Logs Table & Filters */
 #filterAccordion .accordion-button {
-    font-size: 0.9rem; /* Slightly smaller accordion button text */
+    font-size: 1rem; /* Slightly smaller accordion button text */
     font-weight: 500;
 }
 #filterAccordion .accordion-button:not(.collapsed) {
@@ -156,7 +173,7 @@ main {
     cursor: pointer;
     background-color: #f8f9fa;
     font-weight: 600;
-    font-size: 0.8rem; /* Smaller table header font */
+    font-size: 1.03rem; /* Smaller table header font */
     white-space: nowrap;
     vertical-align: middle;
     padding: 0.6rem 0.5rem; /* Adjusted padding */
@@ -167,25 +184,25 @@ main {
 }
 #logsTable th.sort-asc .fas::before {
     content: "\f0de"; /* fa-sort-up */
-    color: #007bff;
+    color: var(--primary-color);
 }
 #logsTable th.sort-desc .fas::before {
     content: "\f0dd"; /* fa-sort-down */
-    color: #007bff;
+    color: var(--primary-color);
 }
 
 #logsTable td {
-    font-size: 0.8rem; /* Smaller table cell font */
+    font-size: 1rem; /* Smaller table cell font */
     vertical-align: middle;
     padding: 0.6rem 0.5rem; /* Adjusted padding */
 }
 #logsTable .btn-outline-primary {
-    --bs-btn-color: #007bff;
-    --bs-btn-border-color: #007bff;
-    --bs-btn-hover-bg: #007bff;
-    --bs-btn-hover-border-color: #007bff;
+    --bs-btn-color: var(--primary-color);
+    --bs-btn-border-color: var(--primary-color);
+    --bs-btn-hover-bg: var(--primary-color);
+    --bs-btn-hover-border-color: var(--primary-color);
     padding: 0.2rem 0.4rem; /* Smaller button padding */
-    font-size: 0.7rem; /* Smaller button font */
+    font-size: 0.8rem; /* Smaller button font */
 }
 
 /* Modal Styling */
@@ -347,4 +364,132 @@ main {
     main {
         padding-top: 60px; /* Space for the toggler */
     }
+}
+
+/* Initial State Styling */
+.initial-state-container {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.welcome-message {
+    text-align: center;
+    max-width: 800px;
+    padding: 3rem;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.welcome-message h2 {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.welcome-message .lead {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.date-range-container {
+    background-color: var(--light-bg);
+    padding: 2rem;
+    border-radius: 0.75rem;
+    margin-top: 2rem;
+}
+
+.date-range-container .form-control {
+    border: 1px solid var(--border-color);
+    padding: 0.75rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.date-range-container .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.date-range-container .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    padding: 0.75rem 2rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.date-range-container .btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+/* Update existing color references */
+.summary-icon.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.summary-icon.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.summary-icon.bg-info {
+    background-color: var(--info-color) !important;
+}
+
+.summary-icon.bg-warning {
+    background-color: var(--warning-color) !important;
+}
+
+#logsTable th.sort-asc .fas::before,
+#logsTable th.sort-desc .fas::before {
+    color: var(--primary-color);
+}
+
+#logsTable .btn-outline-primary {
+    --bs-btn-color: var(--primary-color);
+    --bs-btn-border-color: var(--primary-color);
+    --bs-btn-hover-bg: var(--primary-color);
+    --bs-btn-hover-border-color: var(--primary-color);
+}
+
+
+.spinner-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.spinner-container .spinner-border {
+    width: 4rem;
+    height: 4rem;
+    border-width: 0.25rem;
+}
+
+.spinner-container p {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+/* State Transitions */
+#initialMessage,
+#dashboardContent,
+#noLogsFoundMessage,
+#fetchErrorMessage {
+    transition: opacity 0.3s ease-in-out;
+}
+
+#initialMessage.fade-out,
+#dashboardContent.fade-out,
+#noLogsFoundMessage.fade-out,
+#fetchErrorMessage.fade-out {
+    opacity: 0;
 }
