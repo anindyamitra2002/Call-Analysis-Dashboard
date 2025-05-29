@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Call Analytics Dashboard</title>
+    <title>Call Analytics Dashboard - Upgraded</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="container-fluid layout-wide">
+    <div class="container-fluid">
         <div class="row">
-            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block sidebar collapse vh-100">
                 <div class="position-sticky pt-3">
                     <div class="sidebar-header text-center mb-4">
-                        <i class="fas fa-headset fa-2x me-2"></i>
+                        <i class="fas fa-headset fa-2x me-2 text-primary"></i>
                         <h3 class="fs-5 mb-0 d-inline-block align-middle">Call Analytics</h3>
                     </div>
                     <h6 class="sidebar-heading px-3 mt-4 mb-2 text-muted text-uppercase">Date Range</h6>
@@ -54,7 +55,6 @@
                     </div>
                     <p class="mt-2">Fetching logs, please wait...</p>
                 </div>
-                
                 <div id="initialMessage" class="alert alert-info shadow-sm">
                     <i class="fas fa-info-circle me-2"></i>Please select a date range and click "Fetch Logs" to view analytics.
                 </div>
@@ -65,74 +65,64 @@
                     <i class="fas fa-times-circle me-2"></i>Error fetching logs. Please try again.
                 </div>
 
-
                 <div id="dashboardContent" style="display: none;">
                     <section id="callStatisticsSection" class="mb-4">
                         <h2 class="section-title h4">Summary Statistics</h2>
-                        <div class="row text-center">
-                            <div class="col-lg-3 col-md-6 mb-3">
-                                <div class="card summary-card shadow-sm">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center">
-                                            <div class="summary-icon bg-primary text-white me-3">
-                                                <i class="fas fa-phone-volume"></i>
-                                            </div>
-                                            <div>
-                                                <h5 class="card-title text-muted">Total Calls</h5>
-                                                <p id="totalCalls" class="card-text fs-4 fw-bold mb-0">0</p>
-                                            </div>
+                        <div class="row">
+                            <div class="col-xl-3 col-md-6 mb-3">
+                                <div class="card summary-card shadow-sm h-100">
+                                    <div class="card-body d-flex align-items-center">
+                                        <div class="summary-icon bg-primary text-white me-3">
+                                            <i class="fas fa-phone-volume"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="card-title text-muted">Total Calls</h5>
+                                            <p id="totalCalls" class="card-text fs-4 fw-bold mb-0">0</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-3 col-md-6 mb-3">
-                                <div class="card summary-card shadow-sm">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center">
-                                            <div class="summary-icon bg-success text-white me-3">
-                                                <i class="fas fa-clock"></i>
-                                            </div>
-                                            <div>
-                                                <h5 class="card-title text-muted">Total Duration</h5>
-                                                <p id="totalDuration" class="card-text fs-4 fw-bold mb-0">0 min</p>
-                                            </div>
+                            <div class="col-xl-3 col-md-6 mb-3">
+                                <div class="card summary-card shadow-sm h-100">
+                                    <div class="card-body d-flex align-items-center">
+                                        <div class="summary-icon bg-success text-white me-3">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="card-title text-muted">Total Duration</h5>
+                                            <p id="totalDuration" class="card-text fs-4 fw-bold mb-0">0 min</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-3 col-md-6 mb-3">
-                                <div class="card summary-card shadow-sm">
-                                    <div class="card-body">
-                                         <div class="d-flex align-items-center">
-                                            <div class="summary-icon bg-info text-white me-3">
-                                                <i class="fas fa-hourglass-half"></i>
-                                            </div>
-                                            <div>
-                                                <h5 class="card-title text-muted">Avg. Duration</h5>
-                                                <p id="averageDuration" class="card-text fs-4 fw-bold mb-0">0 min</p>
-                                            </div>
+                            <div class="col-xl-3 col-md-6 mb-3">
+                                <div class="card summary-card shadow-sm h-100">
+                                    <div class="card-body d-flex align-items-center">
+                                        <div class="summary-icon bg-info text-white me-3">
+                                            <i class="fas fa-hourglass-half"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="card-title text-muted">Avg. Duration</h5>
+                                            <p id="averageDuration" class="card-text fs-4 fw-bold mb-0">0 min</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-3 col-md-6 mb-3">
-                                <div class="card summary-card shadow-sm">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center">
-                                            <div class="summary-icon bg-warning text-dark me-3">
-                                                <i class="fas fa-dollar-sign"></i>
-                                            </div>
-                                            <div>
-                                                <h5 class="card-title text-muted">Total Cost</h5>
-                                                <p id="totalCost" class="card-text fs-4 fw-bold mb-0">$0.00</p>
-                                            </div>
+                            <div class="col-xl-3 col-md-6 mb-3">
+                                <div class="card summary-card shadow-sm h-100">
+                                    <div class="card-body d-flex align-items-center">
+                                        <div class="summary-icon bg-warning text-dark me-3">
+                                            <i class="fas fa-dollar-sign"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="card-title text-muted">Total Cost</h5>
+                                            <p id="totalCost" class="card-text fs-4 fw-bold mb-0">$0.00</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </section>
-                    
 
                     <section id="callAnalysisSection" class="mb-4">
                         <h2 class="section-title h4">Call Analysis</h2>
@@ -157,38 +147,37 @@
                                 <div class="tab-content" id="analysisTabsContent">
                                     <div class="tab-pane fade show active p-2" id="costAnalysis" role="tabpanel" aria-labelledby="cost-analysis-tab">
                                         <div class="row">
-                                            <div class="col-lg-6 mb-3 mb-lg-0"><div id="costDistributionChart" class="chart-container"></div></div>
-                                            <div class="col-lg-6"><div id="dailyCostTrendChart" class="chart-container"></div></div>
+                                            <div class="col-lg-6 mb-3 mb-lg-0"><div class="chart-container-wrapper"><canvas id="costDistributionChart" class="chart-canvas"></canvas></div></div>
+                                            <div class="col-lg-6"><div class="chart-container-wrapper"><canvas id="dailyCostTrendChart" class="chart-canvas"></canvas></div></div>
                                         </div>
                                     </div>
                                     <div class="tab-pane fade p-2" id="languageDistribution" role="tabpanel" aria-labelledby="language-distribution-tab">
                                         <div class="row">
-                                            <div class="col-lg-6 mb-3 mb-lg-0"><div id="sttLanguageChart" class="chart-container"></div></div>
-                                            <div class="col-lg-6"><div id="ttsVoiceChart" class="chart-container"></div></div>
+                                            <div class="col-lg-6 mb-3 mb-lg-0"><div class="chart-container-wrapper"><canvas id="sttLanguageChart" class="chart-canvas"></canvas></div></div>
+                                            <div class="col-lg-6"><div class="chart-container-wrapper"><canvas id="ttsVoiceChart" class="chart-canvas"></canvas></div></div>
                                         </div>
                                     </div>
                                     <div class="tab-pane fade p-2" id="timeAnalysis" role="tabpanel" aria-labelledby="time-analysis-tab">
                                         <div class="row">
-                                            <div class="col-lg-6 mb-3 mb-lg-0"><div id="callDurationHistogram" class="chart-container"></div></div>
-                                            <div class="col-lg-6"><div id="callsOverTimeChart" class="chart-container"></div></div>
+                                            <div class="col-lg-6 mb-3 mb-lg-0"><div class="chart-container-wrapper"><canvas id="callDurationHistogram" class="chart-canvas"></canvas></div></div>
+                                            <div class="col-lg-6"><div class="chart-container-wrapper"><canvas id="callsOverTimeChart" class="chart-canvas"></canvas></div></div>
                                         </div>
                                     </div>
                                     <div class="tab-pane fade p-2" id="modelUsage" role="tabpanel" aria-labelledby="model-usage-tab">
                                         <div class="row">
-                                            <div class="col-lg-6 mb-3 mb-lg-0"><div id="llmModelChart" class="chart-container"></div></div>
-                                            <div class="col-lg-6"><div id="llmProviderChart" class="chart-container"></div></div>
+                                            <div class="col-lg-6 mb-3 mb-lg-0"><div class="chart-container-wrapper"><canvas id="llmModelChart" class="chart-canvas"></canvas></div></div>
+                                            <div class="col-lg-6"><div class="chart-container-wrapper"><canvas id="llmProviderChart" class="chart-canvas"></canvas></div></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </section>
-                    
 
                     <section id="callLogsSection">
                         <h2 class="section-title h4">Detailed Call Logs</h2>
                         <div class="card shadow-sm">
-                            <div class="card-header">
+                            <div class="card-header bg-light">
                                 <div class="accordion" id="filterAccordion">
                                     <div class="accordion-item border-0">
                                         <h2 class="accordion-header" id="filterHeader">
@@ -252,12 +241,16 @@
                             <div class="card-body p-0">
                                 <div class="table-responsive scrollable-table-container">
                                     <table class="table table-striped table-hover table-sm mb-0" id="logsTable">
-                                        <thead class="table-light">
+                                        <thead class="table-light sticky-top">
                                             <tr>
                                                 <th data-sort="call_timestamp_ist_display">Date</th>
                                                 <th data-sort="call_time_ist_display">Start Time (IST)</th>
                                                 <th data-sort="duration_minutes">Duration (min)</th>
-                                                <th data-sort="phone_number">Phone Number</th> <th data-sort="stt_language_display">STT Lang.</th> <th data-sort="llm_model">LLM Model</th> <th data-sort="total_cost_usd">Total Cost (USD)</th> <th>Actions</th>
+                                                <th data-sort="phone_number_display">Phone Number</th>
+                                                <th data-sort="stt_language_display">STT Lang.</th>
+                                                <th data-sort="llm_model_display">LLM Model</th>
+                                                <th data-sort="total_cost_usd">Total Cost (USD)</th>
+                                                <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody id="logsTableBody">
@@ -275,21 +268,22 @@
     </div>
 
     <div class="modal fade" id="callDetailModal" tabindex="-1" aria-labelledby="callDetailModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-scrollable"> <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="callDetailModalLabel">Call Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="callDetailModalLabel"><i class="fas fa-info-circle me-2"></i>Call Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row mb-3">
-                        <div class="col-md-4"><strong><i class="fas fa-calendar-alt me-2"></i>Date:</strong> <span id="modalCallDate">N/A</span></div>
-                        <div class="col-md-4"><strong><i class="fas fa-clock me-2"></i>Start Time (IST):</strong> <span id="modalCallStartTime">N/A</span></div>
-                        <div class="col-md-4"><strong><i class="fas fa-phone me-2"></i>Phone Number:</strong> <span id="modalPhoneNumber">N/A</span></div>
+                        <div class="col-md-4"><strong><i class="fas fa-calendar-alt me-2 text-primary"></i>Date:</strong> <span id="modalCallDate">N/A</span></div>
+                        <div class="col-md-4"><strong><i class="fas fa-clock me-2 text-primary"></i>Start Time (IST):</strong> <span id="modalCallStartTime">N/A</span></div>
+                        <div class="col-md-4"><strong><i class="fas fa-phone me-2 text-primary"></i>Phone Number:</strong> <span id="modalPhoneNumber">N/A</span></div>
                     </div>
                     <div class="row mb-3">
-                        <div class="col-md-4"><strong><i class="fas fa-hourglass-end me-2"></i>Duration:</strong> <span id="modalDuration">N/A</span></div>
-                        <div class="col-md-4"><strong><i class="fas fa-calendar-check me-2"></i>End Time (IST):</strong> <span id="modalCallEndTime">N/A</span></div>
-                        <div class="col-md-4"><strong><i class="fas fa-dollar-sign me-2"></i>Total Cost (Call):</strong> <span id="modalTotalCallCost">N/A</span></div>
+                        <div class="col-md-4"><strong><i class="fas fa-hourglass-end me-2 text-primary"></i>Duration:</strong> <span id="modalDuration">N/A</span></div>
+                        <div class="col-md-4"><strong><i class="fas fa-calendar-check me-2 text-primary"></i>End Time (IST):</strong> <span id="modalCallEndTime">N/A</span></div>
+                        <div class="col-md-4"><strong><i class="fas fa-dollar-sign me-2 text-primary"></i>Total Cost (Call):</strong> <span id="modalTotalCallCost">N/A</span></div>
                     </div>
                     <hr>
 
@@ -297,7 +291,7 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="modalSttDetailsHeader">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#modalSttDetailsCollapse" aria-expanded="false" aria-controls="modalSttDetailsCollapse">
-                                    <i class="fas fa-microphone-alt me-2"></i> Speech-to-Text (STT) Details
+                                    <i class="fas fa-microphone-alt me-2 text-primary"></i> Speech-to-Text (STT) Details
                                 </button>
                             </h2>
                             <div id="modalSttDetailsCollapse" class="accordion-collapse collapse" aria-labelledby="modalSttDetailsHeader">
@@ -313,7 +307,7 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="modalLlmDetailsHeader">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#modalLlmDetailsCollapse" aria-expanded="false" aria-controls="modalLlmDetailsCollapse">
-                                    <i class="fas fa-brain me-2"></i> Language Model (LLM) Details
+                                    <i class="fas fa-brain me-2 text-primary"></i> Language Model (LLM) Details
                                 </button>
                             </h2>
                             <div id="modalLlmDetailsCollapse" class="accordion-collapse collapse" aria-labelledby="modalLlmDetailsHeader">
@@ -331,7 +325,7 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="modalTtsDetailsHeader">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#modalTtsDetailsCollapse" aria-expanded="false" aria-controls="modalTtsDetailsCollapse">
-                                    <i class="fas fa-volume-high me-2"></i> Text-to-Speech (TTS) Details
+                                    <i class="fas fa-volume-high me-2 text-primary"></i> Text-to-Speech (TTS) Details
                                 </button>
                             </h2>
                             <div id="modalTtsDetailsCollapse" class="accordion-collapse collapse" aria-labelledby="modalTtsDetailsHeader">
@@ -347,7 +341,7 @@
                         <div class="accordion-item">
                             <h2 class="accordion-header" id="modalConfigDetailsHeader">
                                 <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#modalConfigDetailsCollapse" aria-expanded="false" aria-controls="modalConfigDetailsCollapse">
-                                    <i class="fas fa-cogs me-2"></i> Other Configurations
+                                    <i class="fas fa-cogs me-2 text-primary"></i> Other Configurations
                                 </button>
                             </h2>
                             <div id="modalConfigDetailsCollapse" class="accordion-collapse collapse" aria-labelledby="modalConfigDetailsHeader">
@@ -365,14 +359,14 @@
                         </div>
                     </div>
 
-                    <h5 class="mt-4"><i class="fas fa-comments me-2"></i>Conversation Transcript</h5>
-                    <div id="modalConversationTranscript" class="transcript-container p-2 border rounded mb-3">
+                    <h5 class="mt-4"><i class="fas fa-comments me-2 text-primary"></i>Conversation Transcript</h5>
+                    <div id="modalConversationTranscript" class="transcript-container p-2 border rounded mb-3 bg-light">
                         </div>
 
-                    <h5 class="mt-4"><i class="fas fa-play-circle me-2"></i>Audio Recording</h5>
+                    <h5 class="mt-4"><i class="fas fa-play-circle me-2 text-primary"></i>Audio Recording</h5>
                     <div id="modalAudioPlayerContainer">
                         <p id="modalNoAudioMessage" class="text-muted">No audio recording available for this call.</p>
-                    </div>
+                        </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -387,3 +381,6 @@
     <script src="js/script.js"></script>
 </body>
 </html>
+
+
+
