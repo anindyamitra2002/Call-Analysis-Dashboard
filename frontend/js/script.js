@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
     // API base URL
-    const API_BASE_URL = 'http://localhost:8000/api';
+    const API_BASE_URL = 'https://stackvoice-telephonic-agent-api-fqb2ezg0c2c0d6f4.southindia-01.azurewebsites.net';
 
     // DOM Elements
     const fromDateEl = document.getElementById('fromDate');
@@ -159,7 +159,18 @@ document.addEventListener('DOMContentLoaded', function () {
         showLoading();
 
         try {
-            const response = await fetch(`${API_BASE_URL}/call-logs?from_date_str=${fromDate}&to_date_str=${toDate}`);
+            const response = await fetch(`${API_BASE_URL}/get_call_logs`, {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    start_date: new Date(fromDate).toISOString(),
+                    end_date: new Date(toDate).toISOString()
+                })
+            });
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ detail: "Unknown server error" }));
                 throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.detail}`);
@@ -242,6 +253,144 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
     }
 
+    // Cost dictionary for per-minute rates
+    const costsPerMin = {
+        "STT": {
+            "azure:default": 0.00835,             
+            "sarvam:saarika:v2": 0.00305,         
+            "sarvam:saarika:v1": 0.00305,         
+            "sarvam:saarika:flash": 0.00305,      
+            "deepgram:nova-2-general": 0.00290,   
+            "deepgram:nova-3-general": 0.00385,   
+            "google:default": 0.00800,            
+            "google:command_and_search": 0.01200, 
+            "openai:whisper-1": 0.00300,
+            "iitm:ccc-wav2vec-2.0": 0.000,
+            "groq:whisper-large-v3-turbo": 0.000333,
+            "groq:distil-whisper-large-v3-en": 0.000167,
+            "groq:whisper-large-v3": 0.000925,      
+        },
+        "LLM": {
+            "openai:gpt-4o": 0.0295,
+            "openai:gpt-4o-mini": 0.00093,
+            "openai:gpt-4.1": 0.0124,
+            "openai:gpt-4.1-mini": 0.00248,
+            "openai:gpt-4.1-nano": 0.00062,
+            
+            "deepseek:deepseek-v3": 0.0000784,
+            "deepseek:deepseek-r1": 0.003407,
+            
+            "google:gemini-2.5-flash-preview-04-17": 0.00093,
+            "google:gemini-2.5-pro-preview-05-06":  0.00925,
+            "google:gemini-2.0-flash":              0.00062,
+            "google:gemini-2.0-flash-lite":         0.00062,
+            "google:gemini-1.5-flash":              0.002065,
+            "google:gemini-1.5-flash-8b":           0.0002325,
+            "google:gemini-1.5-pro":                0.02065,
+            
+            "groq:gemma2-9b-it": 0.00106,
+            "groq:llama-3.3-70b-versatile": 0.003187,
+            "groq:llama-3.1-8b-instant": 0.000274,
+            "groq:llama3-70b-8192": 0.003187,
+            "groq:llama3-8b-8192": 0.000274,
+            "groq:deepseek-r1-distill-llama-70b": 0.004047,
+            "groq:mistral-saba-24b": 0.004187,
+            "groq:qwen-qwq-32b": 0.001567,
+            "groq:meta-llama/llama-4-maverick-17b-128e-instruct": 0.00118,
+            "groq:meta-llama/llama-4-scout-17b-16e-instruct": 0.000652,
+            "groq:meta-llama/Llama-Guard-4-12B": 0.00106,
+            
+            "togetherai:Qwen/Qwen3-235B-A22B-fp8-tput":                    0.00118,
+            "togetherai:meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8": 0.001605,
+            "togetherai:meta-llama/Llama-4-Scout-17B-16E-Instruct":         0.001077,
+            "togetherai:deepseek-ai/DeepSeek-R1":                          0.01710,
+            "togetherai:deepseek-ai/DeepSeek-V3":                          0.006625,
+            "togetherai:deepseek-ai/DeepSeek-R1-Distill-Llama-70B":        0.01060,
+            "togetherai:deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B":         0.000954,
+            "togetherai:deepseek-ai/DeepSeek-R1-Distill-Qwen-14B":          0.00848,
+            "togetherai:perplexity-ai/r1-1776":                            0.01710,
+            "togetherai:marin-community/marin-8b-instruct":                0.000954,
+            "togetherai:mistralai/Mistral-Small-24B-Instruct-2501":        0.00424,
+            "togetherai:meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo":       0.000954,
+            "togetherai:meta-llama/Llama-3.3-70B-Instruct-Turbo":           0.004664,
+            "togetherai:nvidia/Llama-3.1-Nemotron-70B-Instruct-HF":        0.004664,
+            "togetherai:Qwen/Qwen2.5-7B-Instruct-Turbo":                    0.00159,
+            "togetherai:Qwen/Qwen2.5-72B-Instruct-Turbo":                  0.00636,
+            "togetherai:Qwen/Qwen2.5-VL-72B-Instruct":                     0.004135,
+            "togetherai:Qwen/Qwen2.5-Coder-32B-Instruct":                  0.00424,
+            "togetherai:Qwen/QwQ-32B":                                     0.00636,
+            "togetherai:Qwen/Qwen2-72B-Instruct":                          0.00477,
+            "togetherai:Qwen/Qwen2-VL-72B-Instruct":                       0.00636,
+            "togetherai:arcee-ai/virtuoso-medium-v2":                      0.00265,
+            "togetherai:arcee-ai/coder-large":                             0.00265,
+            "togetherai:arcee-ai/virtuoso-large":                          0.00390,
+            "togetherai:arcee-ai/maestro-reasoning":                       0.00459,
+            "togetherai:arcee-ai/caller":                                  0.00199,
+            "togetherai:arcee-ai/arcee-blitz":                             0.002475,
+            "togetherai:meta-llama/Meta-Llama-3.1-405B-Instruct-Turbo":     0.01855,
+            "togetherai:meta-llama/Llama-3.2-3B-Instruct-Turbo":            0.000318,
+            "togetherai:meta-llama/Meta-Llama-3-8B-Instruct-Lite":          0.00053,
+            "togetherai:meta-llama/Llama-3-8b-chat-hf":                     0.00053,
+            "togetherai:meta-llama/Llama-3-70b-chat-hf":                    0.004664,
+            "togetherai:google/gemma-2-27b-it":                             0.00424,
+            "togetherai:google/gemma-2b-it":                                0.00053,
+            "togetherai:Gryphe/MythoMax-L2-13b":                            0.00053,
+            "togetherai:mistralai/Mistral-7B-Instruct-v0.1":                0.00106,
+            "togetherai:mistralai/Mistral-7B-Instruct-v0.2":                0.00106,
+            "togetherai:mistralai/Mistral-7B-Instruct-v0.3":                0.00106,
+            "togetherai:NousResearch/Nous-Hermes-2-Mixtral-8x7B-DPO":       0.00318,
+        },
+        "TTS": {
+            "azure": 0.03,        
+            "sarvam": 0.036585,   
+            "elevenlabs": 0.36,   
+            "cartesia": 0.015,
+            "groq": 0.0600,   
+            "resemble": 0.0375,
+        }
+    };
+    
+
+    // Helper function to get cost per minute for a service
+    function getCostPerMinute(service, model) {
+        if (!model) return 0;
+        
+        // Normalize model name to lowercase for case-insensitive matching
+        const normalizedModel = model.toLowerCase();
+        
+        // Search for the model in the cost dictionary
+        const serviceCosts = costsPerMin[service];
+        if (!serviceCosts) return 0;
+
+        // For TTS, just use the provider
+        if (service === "TTS") {
+            return serviceCosts[normalizedModel] || 0;
+        }
+
+        // For STT and LLM, use provider:model format
+        // Try exact match first
+        if (serviceCosts[normalizedModel]) {
+            return serviceCosts[normalizedModel];
+        }
+
+        // Try case-insensitive match
+        for (const [key, value] of Object.entries(serviceCosts)) {
+            if (key.toLowerCase() === normalizedModel) {
+                return value;
+            }
+        }
+
+        // Try partial match
+        for (const [key, value] of Object.entries(serviceCosts)) {
+            if (normalizedModel.includes(key.toLowerCase()) || key.toLowerCase().includes(normalizedModel)) {
+                return value;
+            }
+        }
+
+        console.warn(`No cost found for ${service} model: ${model}`);
+        return 0;
+    }
+
     function processAndDisplayLogs(logs) {
         console.log("%c=== Processing Logs ===", "background: #4CAF50; color: white; padding: 2px 5px;");
         console.log("Number of logs to process:", logs.length);
@@ -250,45 +399,132 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log(`%cProcessing log ${index + 1}:`, "font-weight: bold; color: #4CAF50;");
             console.log("Raw log data:", log);
             
-            // Log the specific fields before processing
-            console.log("Before processing - Raw values:", {
-                stt_model: log.stt_model,
-                tts_language: log.tts_language,
-                vad_min_silence: log.vad_min_silence
-            });
-
-            if (!log.id) {
-                log.id = `call_${new Date(log.call_timestamp_utc).getTime()}_${Math.random().toString(36).substr(2, 9)}`;
+            // Ensure log has an ID
+            if (!log.id || log.id === 'call_NaN_duqfswibp') {
+                log.id = `call_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
             }
-            const utcDate = new Date(log.call_timestamp_utc);
-            log.call_datetime_ist = new Date(utcDate.toLocaleString("en-US", {timeZone: "Asia/Kolkata"}));
-            log.call_timestamp_ist_display = log.call_datetime_ist.toLocaleDateString('en-CA');
-            log.call_time_ist_display = log.call_datetime_ist.toLocaleTimeString('en-IN', {
-                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-            });
-            log.duration_minutes = (log.duration_seconds / 60).toFixed(2);
-            log.phone_number_display = log.phone_number;
-            log.stt_language_display = getLanguageName(log.stt_language);
-            log.llm_model_display = log.llm_model;
-            log.cost_stt_usd = log.cost_stt_usd || 0;
-            log.cost_llm_usd = log.cost_llm_usd || 0;
-            log.cost_tts_usd = log.cost_tts_usd || 0;
-            log.total_cost_usd = log.total_cost_usd || 0;
 
-            // Add missing fields with default values if not present
-            log.stt_model = log.stt_model || '';
-            log.llm_temperature = log.llm_temperature || 0.7;
-            log.tts_language = log.tts_language || '';
-            log.auto_end_call = log.auto_end_call || false;
-            log.background_sound = log.background_sound || false;
-            log.vad_min_silence = log.vad_min_silence || 0;
-            log.allow_interruptions = log.allow_interruptions || false;
+            // Process timestamp and convert to IST
+            try {
+                // Get timestamp from call_timestamps.start
+                const timestampStr = log.call_timestamps?.start;
+                
+                if (timestampStr) {
+                    // Parse the ISO string with timezone
+                    const date = new Date(timestampStr);
+                    if (isNaN(date.getTime())) {
+                        throw new Error('Invalid timestamp value');
+                    }
+                    log.call_datetime_ist = date;
+                    
+                    // Format date and time in 24-hour format
+                    log.call_timestamp_ist_display = date.toLocaleDateString('en-CA');
+                    const hours = date.getHours().toString().padStart(2, '0');
+                    const minutes = date.getMinutes().toString().padStart(2, '0');
+                    const seconds = date.getSeconds().toString().padStart(2, '0');
+                    log.call_time_ist_display = `${hours}:${minutes}:${seconds}`;
+                } else {
+                    throw new Error('No timestamp available');
+                }
+            } catch (error) {
+                console.error(`Error processing timestamp for log ${index}:`, error);
+                const now = new Date();
+                log.call_datetime_ist = now;
+                log.call_timestamp_ist_display = now.toLocaleDateString('en-CA');
+                const hours = now.getHours().toString().padStart(2, '0');
+                const minutes = now.getMinutes().toString().padStart(2, '0');
+                const seconds = now.getSeconds().toString().padStart(2, '0');
+                log.call_time_ist_display = `${hours}:${minutes}:${seconds}`;
+            }
 
-            // Log the specific fields after processing
+            // Process duration from call_duration
+            if (log.call_duration) {
+                log.duration_seconds = parseFloat(log.call_duration.total_seconds) || 0;
+                log.duration_minutes = log.call_duration.minutes || 0;
+                log.duration_seconds_remainder = log.call_duration.seconds || 0;
+                log.duration_display = `${log.duration_minutes}:${log.duration_seconds_remainder.toString().padStart(2, '0')} (${log.duration_seconds.toFixed(2)}s)`;
+            } else {
+                log.duration_seconds = parseFloat(log.duration_seconds) || 0;
+                const minutes = Math.floor(log.duration_seconds / 60);
+                const seconds = Math.floor(log.duration_seconds % 60);
+                log.duration_display = `${minutes}:${seconds.toString().padStart(2, '0')} (${log.duration_seconds.toFixed(2)}s)`;
+            }
+
+            // Process metadata if available
+            if (log.metadata) {
+                // LLM related fields
+                log.llm_model = log.metadata.LLM_model || 'N/A';
+                log.llm_provider = log.metadata.LLM_provider || 'N/A';
+                log.system_prompt = log.metadata.LLM_system_prompt || 'N/A';
+                log.llm_temperature = parseFloat(log.metadata.LLM_temperature) || 0.7;
+
+                // STT related fields
+                log.stt_language = log.metadata.STT_language || 'en-IN';
+                log.stt_model = log.metadata.STT_model || 'default';
+                log.stt_provider = log.metadata.STT_provider || 'N/A';
+
+                // TTS related fields
+                log.tts_language = log.metadata.TTS_language || log.stt_language;
+                log.tts_provider = log.metadata.TTS_provider || 'N/A';
+                log.tts_voice = log.metadata.TTS_voice || 'N/A';
+
+                // Call configuration fields
+                log.phone_number = log.metadata.phone_number || 'N/A';
+                log.auto_end_call = log.metadata.auto_end_call || false;
+                log.background_sound = log.metadata.background_sound || false;
+                log.vad_min_silence = parseFloat(log.metadata.vad_min_silence) || 0;
+                log.allow_interruptions = log.metadata.is_allow_interruptions || false;
+                log.use_retrieval = log.metadata.use_retrieval || false;
+                log.first_message = log.metadata.first_message || 'N/A';
+            }
+
+            // Calculate costs based on duration and models
+            const durationMinutes = log.duration_seconds / 60;
+            
+            // Get cost per minute for each service using provider:model format
+            const sttCostPerMin = getCostPerMinute("STT", `${log.stt_provider}:${log.stt_model}`);
+            console.log("sttCostPerMin", sttCostPerMin);
+            const llmCostPerMin = getCostPerMinute("LLM", `${log.llm_provider}:${log.llm_model}`);
+            console.log("llmCostPerMin", llmCostPerMin);
+            const ttsCostPerMin = getCostPerMinute("TTS", log.tts_provider);
+            console.log("ttsCostPerMin", ttsCostPerMin);
+            
+            // Calculate total costs
+            log.cost_stt_usd = sttCostPerMin * durationMinutes;
+            log.cost_llm_usd = llmCostPerMin * durationMinutes;
+            log.cost_tts_usd = ttsCostPerMin * durationMinutes;
+            log.total_cost_usd = log.cost_stt_usd + log.cost_llm_usd + log.cost_tts_usd;
+
+            // Process display values
+            log.phone_number_display = log.phone_number || 'N/A';
+            log.stt_language_display = getLanguageName(log.stt_language || 'en-IN');
+            log.llm_model_display = log.llm_model || 'N/A';
+
+            // Process transcript if available
+            if (log.conversation_transcript) {
+                log.transcript = log.conversation_transcript;
+            }
+
+            // Process audio URL if available
+            if (log.audio_file?.sas_url) {
+                log.audio_url = log.audio_file.sas_url;
+            }
+
+            // Log the processed values for debugging
             console.log("After processing - Processed values:", {
-                stt_model: log.stt_model,
-                tts_language: log.tts_language,
-                vad_min_silence: log.vad_min_silence
+                call_timestamp_ist_display: log.call_timestamp_ist_display,
+                call_time_ist_display: log.call_time_ist_display,
+                duration_minutes: log.duration_minutes,
+                total_cost_usd: log.total_cost_usd,
+                stt_language_display: log.stt_language_display,
+                llm_model_display: log.llm_model_display,
+                metadata_fields: {
+                    llm_model: log.llm_model,
+                    llm_provider: log.llm_provider,
+                    stt_model: log.stt_model,
+                    stt_provider: log.stt_provider,
+                    tts_provider: log.tts_provider
+                }
             });
         });
 
@@ -458,7 +694,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const dailyCosts = {};
         logs.forEach(log => {
-            const date = log.call_datetime_ist.toISOString().split('T')[0];
+            // Format date as YYYY-MM-DD without using toISOString
+            const date = log.call_datetime_ist.toLocaleDateString('en-CA');
             dailyCosts[date] = (dailyCosts[date] || 0) + (log.total_cost_usd || 0);
         });
         const sortedDates = Object.keys(dailyCosts).sort((a,b) => new Date(a) - new Date(b));
@@ -546,7 +783,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const callsPerDay = {};
         logs.forEach(log => {
-            const date = log.call_datetime_ist.toISOString().split('T')[0];
+            // Format date as YYYY-MM-DD without using toISOString
+            const date = log.call_datetime_ist.toLocaleDateString('en-CA');
             callsPerDay[date] = (callsPerDay[date] || 0) + 1;
         });
         const sortedDatesCalls = Object.keys(callsPerDay).sort((a,b) => new Date(a) - new Date(b));
@@ -658,7 +896,7 @@ document.addEventListener('DOMContentLoaded', function () {
         filteredLogs = allLogs.filter(log => {
             let passes = true;
             if (phoneNumberFilter && !(log.phone_number || '').toLowerCase().includes(phoneNumberFilter)) passes = false;
-            if (dateFilter && log.call_datetime_ist.toISOString().split('T')[0] !== dateFilter) passes = false;
+            if (dateFilter && log.call_datetime_ist.toLocaleDateString('en-CA') !== dateFilter) passes = false;
             if (sttLangFilter && log.stt_language !== sttLangFilter) passes = false;
             if (llmModelFilter && log.llm_model !== llmModelFilter) passes = false;
             if (ttsProviderFilter && log.tts_provider !== ttsProviderFilter) passes = false;
@@ -708,7 +946,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const row = logsTableBodyEl.insertRow();
             row.insertCell().textContent = log.call_timestamp_ist_display;
             row.insertCell().textContent = log.call_time_ist_display;
-            row.insertCell().textContent = `${log.duration_minutes} min`;
+            row.insertCell().textContent = log.duration_display;
             row.insertCell().textContent = log.phone_number_display;
             row.insertCell().textContent = log.stt_language_display;
             row.insertCell().textContent = log.llm_model_display;
@@ -718,8 +956,8 @@ document.addEventListener('DOMContentLoaded', function () {
             actionsCell.classList.add('text-center');
             const viewButton = document.createElement('button');
             viewButton.classList.add('btn', 'btn-sm', 'btn-outline-primary');
-            viewButton.innerHTML = '<i class="fas fa-eye"></i>'; // Icon only for smaller button
-            viewButton.title = "View Details"; // Tooltip
+            viewButton.innerHTML = '<i class="fas fa-eye"></i>';
+            viewButton.title = "View Details";
             viewButton.onclick = () => displayLogDetailsInModal(log);
             actionsCell.appendChild(viewButton);
         });
@@ -733,51 +971,35 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         try {
-            console.log("%c=== Modal Display Debug ===", "background: #4CAF50; color: white; padding: 2px 5px;");
-            console.log("Log object being displayed:", log);
-            
-            // Debug specific fields
-            console.log("Field values in modal:", {
-                stt_model: {
-                    value: log.stt_model,
-                    type: typeof log.stt_model,
-                    isNull: log.stt_model === null,
-                    isUndefined: log.stt_model === undefined,
-                    isEmpty: log.stt_model === ''
-                },
-                tts_language: {
-                    value: log.tts_language,
-                    type: typeof log.tts_language,
-                    isNull: log.tts_language === null,
-                    isUndefined: log.tts_language === undefined,
-                    isEmpty: log.tts_language === ''
-                },
-                vad_min_silence: {
-                    value: log.vad_min_silence,
-                    type: typeof log.vad_min_silence,
-                    isNull: log.vad_min_silence === null,
-                    isUndefined: log.vad_min_silence === undefined,
-                    isZero: log.vad_min_silence === 0
-                }
-            });
-
             const N_A = "N/A";
 
-            // Format date and time
-            const startDate = new Date(log.call_timestamp_utc);
-            modalCallDateEl.textContent = startDate.toLocaleDateString('en-CA') || N_A;
-            modalCallStartTimeEl.textContent = startDate.toLocaleTimeString('en-IN', {
-                timeZone: 'Asia/Kolkata', hour12: true, hour: '2-digit', minute: '2-digit'
-            }) || N_A;
+            // Format date and time for modal using call_timestamps
+            const startDate = new Date(log.call_timestamps?.start);
+            const endDate = new Date(log.call_timestamps?.end);
             
-            const endDate = new Date(startDate.getTime() + (log.duration_seconds * 1000));
-            modalCallEndTimeEl.textContent = endDate.toLocaleTimeString('en-IN', {
-                timeZone: 'Asia/Kolkata', hour12: true, hour: '2-digit', minute: '2-digit'
-            }) || N_A;
+            modalCallDateEl.textContent = startDate.toLocaleDateString('en-CA') || N_A;
+            
+            // Format start time in 24-hour format
+            const startHours = startDate.getHours().toString().padStart(2, '0');
+            const startMinutes = startDate.getMinutes().toString().padStart(2, '0');
+            const startSeconds = startDate.getSeconds().toString().padStart(2, '0');
+            modalCallStartTimeEl.textContent = `${startHours}:${startMinutes}:${startSeconds}`;
+            
+            // Format end time in 24-hour format
+            const endHours = endDate.getHours().toString().padStart(2, '0');
+            const endMinutes = endDate.getMinutes().toString().padStart(2, '0');
+            const endSeconds = endDate.getSeconds().toString().padStart(2, '0');
+            modalCallEndTimeEl.textContent = `${endHours}:${endMinutes}:${endSeconds}`;
+
+            // Format duration using call_duration
+            if (log.call_duration) {
+                modalDurationEl.textContent = `${log.call_duration.minutes}:${log.call_duration.seconds.toString().padStart(2, '0')} (${log.call_duration.total_seconds.toFixed(2)}s)`;
+            } else {
+                modalDurationEl.textContent = log.duration_display || N_A;
+            }
 
             // Basic call info
             modalPhoneNumberEl.textContent = log.phone_number || N_A;
-            modalDurationEl.textContent = `${(log.duration_seconds / 60).toFixed(2)} min (${log.duration_seconds.toFixed(2)}s)` || N_A;
             modalTotalCallCostEl.textContent = log.total_cost_usd !== undefined ? `$${log.total_cost_usd.toFixed(4)}` : N_A;
 
             // STT Details

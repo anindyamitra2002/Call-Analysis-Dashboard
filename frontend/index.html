@@ -32,17 +32,17 @@
                 <div id="initialMessage" class="initial-state-container">
                     <div class="welcome-message">
                         <i class="fas fa-headset fa-4x mb-4 text-primary"></i>
-                        <h2 class="mb-4">Welcome to Call Analytics Dashboard</h2>
+                        <h2 class="mb-4">Welcome to StackVoice Call Analytics</h2>
                         <p class="lead mb-4">Select a date range to view detailed call analytics and insights</p>
                         <div class="date-range-container">
                             <div class="row justify-content-center">
-                                <div class="col-md-4">
+                                <div class="col-md-5">
                                     <div class="form-group mb-3">
                                         <label for="fromDate" class="form-label">From Date</label>
                                         <input type="date" id="fromDate" class="form-control">
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-5">
                                     <div class="form-group mb-3">
                                         <label for="toDate" class="form-label">To Date</label>
                                         <input type="date" id="toDate" class="form-control">
@@ -50,7 +50,7 @@
                                 </div>
                             </div>
                             <button id="fetchLogsBtn" class="btn btn-primary btn-lg mt-3">
-                                <i class="fas fa-search me-2"></i> Fetch Analytics
+                                <i class="fas fa-search me-2"></i> Fetch Call Logs
                             </button>
                         </div>
                     </div>
@@ -367,9 +367,6 @@
                     <div id="modalAudioPlayerContainer">
                         <p id="modalNoAudioMessage" class="text-muted">No audio recording available for this call.</p>
                         </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
