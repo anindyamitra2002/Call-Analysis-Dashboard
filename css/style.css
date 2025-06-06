@@ -493,3 +493,29 @@ main {
 #fetchErrorMessage.fade-out {
     opacity: 0;
 }
+
+.transcript-entry {
+    position: relative;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
+.transcript-user {
+    background-color: #e3f2fd;
+    margin-right: 2rem;
+}
+.transcript-assistant {
+    background-color: #f5f5f5;
+    margin-left: 2rem;
+}
+.transcript-role {
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+.transcript-timestamp {
+    position: absolute;
+    bottom: 0.25rem;
+    right: 0.5rem;
+    font-size: 0.75rem;
+    color: #666;
+}

@@ -1064,6 +1064,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     const messageP = document.createElement('p');
                     messageP.textContent = item.content || item.message || '';
 
+                    // Add timestamp if available
+                    if (item.timestamp) {
+                        const timestampDiv = document.createElement('div');
+                        timestampDiv.classList.add('transcript-timestamp');
+                        const timestamp = new Date(item.timestamp);
+                        const hours = timestamp.getHours();
+                        const minutes = timestamp.getMinutes().toString().padStart(2, '0');
+                        const seconds = timestamp.getSeconds().toString().padStart(2, '0');
+                        const ampm = hours >= 12 ? 'PM' : 'AM';
+                        const hours12 = hours % 12 || 12;
+                        timestampDiv.textContent = `${hours12}:${minutes}:${seconds} ${ampm}`;
+                        messageDiv.appendChild(timestampDiv);
+                    }
+
                     messageDiv.appendChild(roleSpan);
                     messageDiv.appendChild(messageP);
                     modalConversationTranscriptEl.appendChild(messageDiv);
