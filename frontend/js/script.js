@@ -1,10 +1,19 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // API base URL
+    // API base URL - Update this to your backend server URL when deploying
+    // For local development, you can use: 'http://localhost:8000'
+    // For production, use your actual backend server URL
     const API_BASE_URL = 'https://stackvoice-telephonic-agent-api-fqb2ezg0c2c0d6f4.southindia-01.azurewebsites.net';
+    
+    // To change the API URL for different environments, you can:
+    // 1. Update this constant directly
+    // 2. Use environment variables
+    // 3. Use a config file
+    // 4. Use URL parameters
 
     // DOM Elements
     const fromDateEl = document.getElementById('fromDate');
     const toDateEl = document.getElementById('toDate');
+    const userIdEl = document.getElementById('userId');
     const fetchLogsBtn = document.getElementById('fetchLogsBtn');
     const currentTimeEl = document.getElementById('currentTime');
     const loadingSpinnerEl = document.getElementById('loadingSpinner');
@@ -70,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function () {
     let chartInstances = {};
 
     const languageNameMap = {
-        'en-IN': 'English (India)', 'hi-IN': 'Hindi', 'bn-IN': 'Bengali',
+        'en-IN': 'English', 'hi-IN': 'Hindi', 'bn-IN': 'Bengali',
         'ta-IN': 'Tamil', 'te-IN': 'Telugu', 'gu-IN': 'Gujarati',
         'kn-IN': 'Kannada', 'ml-IN': 'Malayalam', 'mr-IN': 'Marathi',
         'or-IN': 'Odia', 'pa-IN': 'Punjabi', 'en-US': 'English (US)',
@@ -145,7 +154,12 @@ document.addEventListener('DOMContentLoaded', function () {
     async function fetchAndDisplayLogs() {
         const fromDate = fromDateEl.value;
         const toDate = toDateEl.value;
+        const userId = userIdEl.value.trim();
 
+        if (!userId) {
+            showError('Please enter a user ID.');
+            return;
+        }
         if (!fromDate || !toDate) {
             showError('Please select both dates.');
             return;
@@ -166,6 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
+                    user_id: userId,
                     start_date: new Date(fromDate).toISOString(),
                     end_date: new Date(toDate).toISOString()
                 })
